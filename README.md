@@ -14,6 +14,7 @@ npm run dev
 
 On this project, it was added the following items about reactflow:
  - Custom nodes
- - Save and restore workstation
+ - Save and restore workstation ( with control + s or clicking on button )
+ - Alert to notify saved workstation
  - Nodes connection
  - Minimap, Background, and Panel
