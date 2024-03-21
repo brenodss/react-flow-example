@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+
 import ReactFlow, {
   ReactFlowProvider,
   useNodesState,
@@ -11,9 +12,11 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { onNodeConnection } from './types/ReactFlowTypes';
-import { initialNodes, nodeTypes } from './nodes';
+import { initialNodes, nodeTypes } from './components/Reactflow/nodes';
+import { useSavedAlert } from './hooks/useSavedAlert';
+import SavedAlert from './components/SavedAlert';
 
-const flowKey = 'example-flow';
+export const flowKey = 'example-flow';
 
 const getNodeId = () => `randomnode_${+new Date()}`;
 
@@ -23,20 +26,10 @@ const SaveRestore = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [rfInstance, setRfInstance] = useState<any>(null); // onInit method have <any any> parameters types 
-  
+  const {showAlert, onSave} = useSavedAlert(rfInstance);
   const { setViewport } = useReactFlow();
 
-  const onSave = useCallback(() => {
-    if (rfInstance) {
-      // @ts-ignore
-      const flow = rfInstance.toObject() as any; // Ts does not see onInit method to set rfInstance
-      localStorage.setItem(flowKey, JSON.stringify(flow));
-      console.log(rfInstance);
-      
-    }
-  }, [rfInstance]);
-
-  const onRestore = useCallback(() => {
+  const restoreWorkstation = useCallback(() => {
     const restoreFlow = async () => {
       const flow = localStorage.getItem(flowKey)
       
@@ -51,12 +44,14 @@ const SaveRestore = () => {
 
     restoreFlow();
   }, [setNodes, setViewport]);
+  useEffect(() => { restoreWorkstation()}, [])
+
 
   const onConnect = useCallback((params: onNodeConnection) => {    
     return setEdges((eds) => addEdge(params, eds))
   }, [setEdges]);
 
-  const onAdd = useCallback(() => {
+  const addNode = useCallback(() => {
     const newNode = {
       id: getNodeId(),
       data: { label: 'Added node' },
@@ -81,12 +76,13 @@ const SaveRestore = () => {
       <Panel className='' position="top-right">
         <div className='flex gap-x-4'>
           <button className='border border-black p-2 rounded-md hover:bg-gray-200' onClick={onSave}>save</button>
-          <button className='border border-black p-2 rounded-md hover:bg-gray-200' onClick={onRestore}>restore</button>
-          <button className='border border-black p-2 rounded-md hover:bg-gray-200' onClick={onAdd}>add node</button>
+          <button className='border border-black p-2 rounded-md hover:bg-gray-200' onClick={restoreWorkstation}>restore</button>
+          <button className='border border-black p-2 rounded-md hover:bg-gray-200' onClick={addNode}>add node</button>
         </div>
       </Panel>
       <Background />
       <MiniMap />
+      {showAlert && <SavedAlert /> }
     </ReactFlow>
   );
 };
