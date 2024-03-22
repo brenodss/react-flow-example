@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import {Toaster} from 'sonner'
 
 import ReactFlow, {
   ReactFlowProvider,
@@ -14,7 +15,6 @@ import 'reactflow/dist/style.css';
 import { onNodeConnection } from './types/ReactFlowTypes';
 import { initialNodes, nodeTypes } from './components/Reactflow/nodes';
 import { useSavedAlert } from './hooks/useSavedAlert';
-import SavedAlert from './components/SavedAlert';
 
 export const flowKey = 'example-flow';
 
@@ -26,7 +26,8 @@ const SaveRestore = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [rfInstance, setRfInstance] = useState<any>(null); // onInit method have <any any> parameters types 
-  const {showAlert, onSave} = useSavedAlert(rfInstance);
+  const {onSave} = useSavedAlert(rfInstance);
+  
   const { setViewport } = useReactFlow();
 
   const restoreWorkstation = useCallback(() => {
@@ -45,7 +46,6 @@ const SaveRestore = () => {
     restoreFlow();
   }, [setNodes, setViewport]);
   useEffect(() => { restoreWorkstation()}, [])
-
 
   const onConnect = useCallback((params: onNodeConnection) => {    
     return setEdges((eds) => addEdge(params, eds))
@@ -82,7 +82,7 @@ const SaveRestore = () => {
       </Panel>
       <Background />
       <MiniMap />
-      {showAlert && <SavedAlert /> }
+      <Toaster position="bottom-right" richColors theme='light' />
     </ReactFlow>
   );
 };
